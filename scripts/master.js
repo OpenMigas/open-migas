@@ -6,7 +6,7 @@ var selected = new Selected('file-selected');
 
 function init(){
 	var win = remote.getCurrentWindow();
-	let explorerPath = ['C:\\Users\\Luiss\\Documents\\Julian\\dev\\electron-app-example'];
+	let explorerPath = ['C:\\'];
 
 	document.querySelector('#close-button').addEventListener('click', function(e){
 		win.close();
@@ -56,14 +56,16 @@ function updateLocation(explorerPath, targetDir){
 	splitLocation.forEach(function(item, index){
 		let locEl = document.createElement('span');
 		locEl.setAttribute('class', 'location-element');
+
 		locEl.innerHTML = item;
 
 		//get current iteration location
-		let currLocation = splitLocation.slice(0, index + 1).join(path.sep);
-		locEl.location = currLocation;
+		let locationSliced = splitLocation.slice(0, index + 1);
+		let currLocation = locationSliced.join(path.sep);
 
 		locEl.addEventListener('click', function(e){
-			explorerPath.push(currLocation);
+			//fix C location to be at root
+			locationSliced.length === 1 ? explorerPath.push('C:\\') : explorerPath.push(currLocation);
 			updateLocation(explorerPath);
 		});
 
@@ -98,13 +100,18 @@ function appendFiles(explorerPath){
 									if (err){
 										console.error(err);
 									}
-									console.log(child);
 								});
 							}
 						});
 					});
 
 					span.addEventListener('click', function(e){
+						selected.clearAndAdd(span);
+					});
+
+					//right click
+					span.addEventListener('contextmenu', function(e){
+						e.stopPropagation();
 						selected.clearAndAdd(span);
 					});
 
