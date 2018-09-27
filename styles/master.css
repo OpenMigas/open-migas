@@ -1,0 +1,207 @@
+* {
+    margin: 0;
+    padding:0;
+    box-sizing: border-box;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    color: #fff;
+    background: #000;
+    font-family: sans-serif;
+    border: solid 5px #000;
+
+    display: grid;
+    overflow: hidden;
+
+    grid-template-rows: 30px auto minmax(0, 1fr);
+}
+
+button {
+    border: none;
+    -webkit-user-select: none;
+}
+
+.file-selected {
+    box-shadow: inset 0 0 0 2px #888;
+}
+
+.title-bar {
+    position: relative;
+    padding: 5px;
+    text-align: center;
+    font-size: 15px;
+    background: #000;
+    box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.25);
+    z-index: 1000;
+
+    -webkit-user-select: none;
+    -webkit-app-region: drag;
+}
+
+.window-buttons {
+    position: absolute;
+    top: 0;
+    right: 0;
+    -webkit-app-region: no-drag;
+}
+
+.window-buttons button {
+    font-size: 15px;
+    padding: 5px;
+    height: 25px;
+    width: 25px;
+    background: none;
+    color: #fff;
+}
+
+.maximize-button:hover {
+    background: rgb(62, 62, 204);
+}
+
+.minimize-button:hover {
+    background: rgb(62, 62, 204);
+}
+
+.close-button:hover {
+    background: #ff3232;
+}
+
+.title {
+    text-align: center;
+}
+
+.navigation {
+    padding: 5px;
+    display: grid;
+    grid-template-columns: auto auto auto 2fr 1fr;
+    grid-column-gap: 5px;
+    background: #383838;
+}
+
+.navigation > * {
+    border-radius: 3px;
+}
+
+.search-bar {
+    background: #484848;
+    border: none;
+    border-radius: 3px;
+    padding: 0 8px;
+    font-size: 0.8em;
+    color: #fff;
+}
+
+.directory-path {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    overflow: hidden;
+    background: #484848;
+}
+
+.grad-shadow {
+    position: absolute;
+    left: 0;
+    height: 100%;
+    width: 0;
+    box-shadow: 0px 0px 20px 20px #484848;
+}
+
+.path-container {
+    display: flex;
+}
+
+.location-separator::after {
+    content: '>';
+    display: block;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    color: #aaa;
+    font-weight: bold; 
+}
+
+.location-element {
+    display: inline-block;
+    padding: 5px;
+    margin-right: 5px;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+}
+
+.location-element:hover {
+    box-shadow: inset 0 0 0px 1px #888;
+}
+
+.navigation-button {
+    width: 36px;
+    height: 36px;
+}
+
+main {
+    position: relative;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+}
+
+.navigation-pane {
+    background: rgb(22, 22, 22);
+    padding: 5px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-user-select: none;
+}
+
+.navigation-container {
+    width: 100%;
+}
+
+.navigation-container span {
+    display: block;
+    padding: 5px 10px;
+    width: 100%;
+    min-width: 100px;
+    font-size: 1em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.navigation-container span:hover {
+    background: #505050;
+}
+
+.navigation-container span .icon, .explorer-container span .icon {
+    height: 1em;
+    margin-right: 10px;
+}
+
+.explorer {
+    background: rgb(39, 39, 39);
+    padding: 5px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-user-select: none;
+}
+
+.explorer-container {
+    width: 100%;
+}
+
+.explorer-container span {
+    display: block;
+    padding: 5px 10px;
+    width: 100%;
+    min-width: 100px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.explorer-container span:hover {
+    background: #505050;
+}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Hello World!</title>
+        <link rel="stylesheet" type="text/css" href="styles/master.css">
+    </head>
+    <body>
+        <div class="title-bar">
+            <div class="title">
+                Electron app
+            </div>
+            <div class="window-buttons">
+                <button id="minimize-button" class="minimize-button">_</button>
+                <button id="maximize-button" class="maximize-button">+</button>
+                <button id="close-button" class="close-button">x</button>
+            </div>
+        </div>
+        <div class="navigation">
+            <button id="back" class="navigation-button"><</button>
+            <button id="forward" class="navigation-button">></button>
+            <button id="up" class="navigation-button">^</button>
+            <div class="directory-path" id="directory-path-bar">
+                <div class="path-container"></div>
+                <div class="grad-shadow"></div>
+            </div>
+            <input type="text" placeholder="Search" class="search-bar">
+        </div>
+        <main>
+            <div class="navigation-pane">
+                <div class="navigation-container" id="navigation-container"></div>
+            </div>
+            <div class="explorer">
+                <div class="explorer-container" id="explorer-container"></div>
+            </div>
+        </main>
+        <script src="scripts/master.js"></script>
+    </body>
+</html>
