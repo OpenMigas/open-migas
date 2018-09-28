@@ -112,8 +112,9 @@ function appendFiles(explorerPath){
 					//right click
 					span.addEventListener('contextmenu', function(e){
 						e.stopPropagation();
+						e.preventDefault();
 						selected.clearAndAdd(span);
-					});
+					}, false);
 
 					if (stat.isDirectory()){
 						span.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
