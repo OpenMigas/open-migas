@@ -14,6 +14,7 @@ body {
 
     display: grid;
     overflow: hidden;
+    cursor: default;
 
     grid-template-rows: 30px auto minmax(0, 1fr);
 }
@@ -25,6 +26,24 @@ button {
 
 .file-selected {
     box-shadow: inset 0 0 0 2px #888;
+}
+
+.context-menu {
+    position: absolute;
+    width: 200px;
+    padding: 5px;
+    box-shadow: inset 0 0 0px 1px #888;
+    background: #bbb;
+}
+
+.context-menu li {
+    display: block;
+    padding: 5px;
+    color: #000;
+}
+
+.context-menu li:hover {
+    background: #aaa;
 }
 
 .title-bar {

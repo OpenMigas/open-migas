@@ -2,7 +2,48 @@ const remote = require('electron').remote;
 const fs = require('fs');
 const path = require('path');
 const exec = require('child_process').execFile;
+
 var selected = new Selected('file-selected');
+var contextmenu = new ContextMenu();
+
+//create one single context menu for the body
+function ContextMenu(){
+	var elementRef = document.createElement('ul');
+	var appended = false;
+	elementRef.classList.add('context-menu');
+
+	this.create = function(x, y, list){
+		this.remove();
+		elementRef.style.left = x + 'px';
+		elementRef.style.top = y + 'px';
+
+		list.forEach(function(item){
+			let li = document.createElement('li');
+			li.innerHTML = item.content;
+
+			li.addEventListener(item.event.type, item.event.handler);
+
+			document.body.addEventListener('mousedown', function handler(e){
+				if (e.path.indexOf(elementRef) === -1){
+					contextmenu.remove();
+					console.log(e);
+					document.body.removeEventListener('mousedown', handler);
+				}
+			});
+
+			elementRef.appendChild(li);
+		});
+
+		document.body.appendChild(elementRef);
+		appended = true;
+	}
+
+	this.remove = function(){
+		elementRef.innerHTML = '';
+		if (appended) document.body.removeChild(elementRef);
+		appended = false;
+	}
+}
 
 function init(){
 	var win = remote.getCurrentWindow();
@@ -114,6 +155,19 @@ function appendFiles(explorerPath){
 						e.stopPropagation();
 						e.preventDefault();
 						selected.clearAndAdd(span);
+
+						var listElements = [];
+						listElements.push({
+							content: 'Log tl-lI5',
+							event: {
+								type: 'click',
+								handler: function(e){
+									console.log('tl-lI5');
+								}
+							}
+						});
+
+						contextmenu.create(e.clientX, e.clientY, listElements);
 					}, false);
 
 					if (stat.isDirectory()){
