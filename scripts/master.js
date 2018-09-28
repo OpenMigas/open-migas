@@ -67,7 +67,7 @@ function init(){
 
 	updateLocation(explorerPath);
 
-	document.querySelector('#back').addEventListener('click', function(){
+	document.querySelector('#up').addEventListener('click', function(){
 		updateLocation(explorerPath, '../');
 	});
 
