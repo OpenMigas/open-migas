@@ -93,7 +93,7 @@ button {
 .navigation {
     padding: 5px;
     display: grid;
-    grid-template-columns: auto auto auto 2fr 1fr;
+    grid-template-columns: auto auto auto auto 2fr 1fr;
     grid-column-gap: 5px;
     background: #383838;
 }
