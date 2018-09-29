@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <title>Hello World!</title>
         <link rel="stylesheet" type="text/css" href="styles/master.css">
+        <link rel="stylesheet" href="fonts/fontello/css/fontello.css">
     </head>
     <body>
         <div class="title-bar">
@@ -11,15 +12,15 @@
                 Electron app
             </div>
             <div class="window-buttons">
-                <button id="minimize-button" class="minimize-button">_</button>
-                <button id="maximize-button" class="maximize-button">+</button>
-                <button id="close-button" class="close-button">x</button>
+                <button id="minimize-button" class="minimize-button"><i class="icon-window-minimize"></i></button>
+                <button id="maximize-button" class="maximize-button"><i class="icon-window-maximize"></i></button>
+                <button id="close-button" class="close-button"><i class="icon-cancel"></i></button>
             </div>
         </div>
         <div class="navigation">
-            <button id="back" class="navigation-button"><</button>
-            <button id="forward" class="navigation-button">></button>
-            <button id="up" class="navigation-button">^</button>
+            <button id="back" class="navigation-button"><i class="icon-left-big"></i></button>
+            <button id="forward" class="navigation-button"><i class="icon-right-big"></i></button>
+            <button id="up" class="navigation-button"><i class="icon-up-big"></i></button>
             <div class="directory-path" id="directory-path-bar">
                 <div class="path-container"></div>
                 <div class="grad-shadow"></div>
