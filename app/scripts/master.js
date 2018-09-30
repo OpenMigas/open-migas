@@ -1,53 +1,18 @@
 const remote = require('electron').remote;
 const fs = require('fs');
 const path = require('path');
-const exec = require('child_process').execFile;
+const exec = require('child_process').execFile;					
+const {Menu, MenuItem} = remote;
 
 var selected = new Selected('file-selected');
-var contextmenu = new ContextMenu();
-
-//create one single context menu for the body
-function ContextMenu(){
-	var elementRef = document.createElement('ul');
-	var appended = false;
-	elementRef.classList.add('context-menu');
-
-	this.create = function(x, y, list){
-		this.remove();
-		elementRef.style.left = x + 'px';
-		elementRef.style.top = y + 'px';
-
-		list.forEach(function(item){
-			let li = document.createElement('li');
-			li.innerHTML = item.content;
-
-			li.addEventListener(item.event.type, item.event.handler);
-
-			document.body.addEventListener('mousedown', function handler(e){
-				if (e.path.indexOf(elementRef) === -1){
-					contextmenu.remove();
-					console.log(e);
-					document.body.removeEventListener('mousedown', handler);
-				}
-			});
-
-			elementRef.appendChild(li);
-		});
-
-		document.body.appendChild(elementRef);
-		appended = true;
-	}
-
-	this.remove = function(){
-		elementRef.innerHTML = '';
-		if (appended) document.body.removeChild(elementRef);
-		appended = false;
-	}
-}
 
 function init(){
 	var win = remote.getCurrentWindow();
 	let explorerPath = ['C:\\'];
+
+	window.addEventListener('contextmenu', (e) => {
+		e.preventDefault();
+	})
 
 	document.querySelector('#close-button').addEventListener('click', function(e){
 		win.close();
@@ -122,6 +87,10 @@ function updateLocation(explorerPath, targetDir){
 
 function appendFiles(explorerPath){
 	fs.readdir(explorerPath[explorerPath.length - 1], function(err, files){
+		if (err) {
+			return console.error(err);
+		}
+
 		let explorerContainer = document.querySelector('#explorer-container');
 		let navigationContainer = document.querySelector('#navigation-container');
 
@@ -130,81 +99,62 @@ function appendFiles(explorerPath){
 
 		setTimeout(function(){
 			files.forEach(function(file){
+				let fileName = path.resolve(explorerPath[explorerPath.length - 1], file);
+				let span = document.createElement('span');
+				let stat;
+
 				try {
-					let stat = fs.statSync(path.resolve(explorerPath[explorerPath.length - 1], file));
-					let span = document.createElement('span');
-
-					span.addEventListener('dblclick', function(e){
-						fs.stat(path.resolve(explorerPath[explorerPath.length - 1], file), function(err, stats){
-							if(stats.isFile()){
-								let child = exec('explorer', [path.resolve(explorerPath[explorerPath.length - 1], file)], (err, stdout, stderr) => {
-									if (err){
-										console.error(err);
-									}
-								});
-							}
-						});
-					});
-
-					span.addEventListener('click', function(e){
-						selected.clearAndAdd(span);
-					});
-
-					//right click
-					span.addEventListener('contextmenu', function(e){
-						e.stopPropagation();
-						e.preventDefault();
-						selected.clearAndAdd(span);
-
-						var listElements = [];
-						listElements.push({
-							content: 'Log tl-lI5',
-							event: {
-								type: 'click',
-								handler: function(e){
-									console.log('tl-lI5');
-								}
-							}
-						});
-
-						contextmenu.create(e.clientX, e.clientY, listElements);
-					}, false);
-
-					if (stat.isDirectory()){
-						span.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
-						navigationContainer.appendChild(span);
-						//add event listener
-						span.addEventListener('dblclick', function(e){
-							updateLocation(explorerPath, file);
-						});
-					} else {
-						span.innerHTML = '<img src="img/file-icon.png" class="icon">' + file;
-					}
-
-					explorerContainer.appendChild(span);
-				} catch(err){
-					console.error(err);
+					stat = fs.statSync(fileName);
+				} catch (err) {
+					return console.error(err);
 				}
+
+				span.addEventListener('dblclick', function(e){
+					if (stat.isFile()) {
+						let child = exec('explorer', [fileName], (err, stdout, stderr) => {
+							if (err){
+								console.error(err);
+							}
+						});
+					}
+				});
+
+				span.addEventListener('click', function(e){
+					selected.clearAndAdd(span);
+				});
+
+				span.addEventListener('contextmenu', (e) => {
+					selected.clearAndAdd(span);
+					const menu = new Menu();
+					menu.append(new MenuItem({label: 'MenuItem1', click() { console.log('item 1 clicked') }}))
+					menu.append(new MenuItem({type: 'separator'}))
+					menu.append(new MenuItem({label: 'MenuItem2', type: 'checkbox', checked: true}))
+					menu.popup({window: remote.getCurrentWindow()});
+				}, false);
+
+				if (stat.isDirectory()){
+					//side nav folder structure
+					let sideNavFolder = document.createElement('span');
+					sideNavFolder.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
+					sideNavFolder.addEventListener('dblclick', function(e){
+						updateLocation(explorerPath, file);
+					});
+					navigationContainer.appendChild(sideNavFolder);
+
+					//explorer folders
+					span.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
+					navigationContainer.appendChild(span);
+					//add event listener
+					span.addEventListener('dblclick', function(e){
+						updateLocation(explorerPath, file);
+					});
+				} else {
+					span.innerHTML = '<img src="img/file-icon.png" class="icon">' + file;
+				}
+
+				explorerContainer.appendChild(span);
 			});
 		}, 0);
-
-		setTimeout(function(){
-			files.forEach(function(file){
-				try {
-					if (fs.statSync(path.resolve(explorerPath[explorerPath.length - 1], file)).isDirectory()){
-						let span = document.createElement('span');
-						span.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
-						//add event listener
-						span.addEventListener('dblclick', function(e){
-							updateLocation(explorerPath, file);
-						});
-						navigationContainer.appendChild(span);
-					}
-				} catch(err){
-					console.error(err);
-				}
-			});
-		}, 1);
 	});
 }
 
