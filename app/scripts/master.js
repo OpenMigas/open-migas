@@ -125,10 +125,49 @@ function appendFiles(explorerPath){
 
 				span.addEventListener('contextmenu', (e) => {
 					selected.clearAndAdd(span);
-					const menu = new Menu();
-					menu.append(new MenuItem({label: 'MenuItem1', click() { console.log('item 1 clicked') }}))
-					menu.append(new MenuItem({type: 'separator'}))
-					menu.append(new MenuItem({label: 'MenuItem2', type: 'checkbox', checked: true}))
+					
+					const template = [
+						{
+							label: 'Open'
+						},
+						{
+							type: 'separator'
+						},
+						{
+							label: 'Undo',
+							accelerator: 'Ctrl+Z',
+							click: () => {console.log('undo')}
+						},
+						{
+							label: 'Redo',
+							accelerator: 'Ctrl+Y',
+							click: () => {console.log('redo')}
+						},
+						{
+							type: 'separator'
+						},
+						{
+							label: 'Cut',
+							accelerator: 'Ctrl+X',
+							click: () => {console.log('cut')}
+						},
+						{
+							label: 'Copy',
+							accelerator: 'Ctrl+C',
+							click: () => {console.log('copy')}
+						},
+						{
+							label: 'Paste',
+							accelerator: 'Ctrl+V',
+							click: () => {console.log('paste')}
+						},
+						{
+							label: 'Delete',
+							accelerator: 'Delete',
+							click: () => {console.log('delete')}
+						}
+					];
+					const menu = Menu.buildFromTemplate(template);
 					menu.popup({window: remote.getCurrentWindow()});
 				}, false);
 
