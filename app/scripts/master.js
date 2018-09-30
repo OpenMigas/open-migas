@@ -106,6 +106,7 @@ function appendFiles(explorerPath){
 				let fileName = path.resolve(explorerPath[explorerPath.length - 1], file);
 				let span = document.createElement('span');
 				let stat;
+				let open;
 
 				try {
 					stat = fs.statSync(fileName);
@@ -113,13 +114,25 @@ function appendFiles(explorerPath){
 					return console.error(err);
 				}
 
-				span.addEventListener('dblclick', function(e){
-					if (stat.isFile()) {
+				if (stat.isFile()){
+					open = function(){
 						let child = exec('explorer', [fileName], (err, stdout, stderr) => {
 							if (err){
 								console.error(err);
 							}
 						});
+					}
+				}
+
+				if (stat.isDirectory()){
+					open = function(){
+						updateLocation(explorerPath, file);
+					}
+				}
+
+				span.addEventListener('dblclick', function(e){
+					if (stat.isFile()) {
+						open();
 					}
 				});
 
@@ -132,7 +145,8 @@ function appendFiles(explorerPath){
 					
 					const template = [
 						{
-							label: 'Open'
+							label: 'Open',
+							click: () => {open()}
 						},
 						{
 							type: 'separator'
@@ -189,7 +203,7 @@ function appendFiles(explorerPath){
 					navigationContainer.appendChild(span);
 					//add event listener
 					span.addEventListener('dblclick', function(e){
-						updateLocation(explorerPath, file);
+						open();
 					});
 				} else {
 					span.innerHTML = '<img src="img/file-icon.png" class="icon">' + file;
