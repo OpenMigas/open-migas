@@ -220,3 +220,24 @@ main {
 .explorer-container span:hover {
     background: #505050;
 }
+
+/*custom scrollbar*/
+/* width */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #383838;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #646464; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #888888; 
+}
