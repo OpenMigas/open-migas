@@ -36,6 +36,10 @@ function init(){
 		updateLocation(explorerPath, '../');
 	});
 
+	document.querySelector('#reload').addEventListener('click', function(){
+		updateLocation(explorerPath);
+	});
+
 	win.on('resize', function(){
 		if (win.isMaximized()){
 			document.querySelector('body').style.border = 'none';
