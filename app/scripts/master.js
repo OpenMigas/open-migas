@@ -42,8 +42,10 @@ function init(){
 
 	win.on('resize', function(){
 		if (win.isMaximized()){
+			document.querySelector('#maximize-button').innerHTML = '<i class="icon-window-restore"></i>';
 			document.querySelector('body').style.border = 'none';
 		} else {
+			document.querySelector('#maximize-button').innerHTML = '<i class="icon-window-maximize"></i>';
 			document.querySelector('body').style.border = 'solid 5px #000';
 		}
 	});
@@ -60,8 +62,13 @@ function updateLocation(explorerPath, targetDir){
 	appendFiles(explorerPath);
 	
 	var pathContainer = document.querySelector('.path-container');
-	pathContainer.innerHTML = '';
 	var splitLocation = explorerPath[explorerPath.length - 1].split(path.sep);
+
+	//remove empty string
+	if (splitLocation[splitLocation.length - 1] === '') {
+		splitLocation.splice(-1, 1);
+	}
+	pathContainer.innerHTML = '';
 
 	splitLocation.forEach(function(item, index){
 		let locEl = document.createElement('span');
@@ -84,6 +91,7 @@ function updateLocation(explorerPath, targetDir){
 		if (index < splitLocation.length - 1){
 			let locSep = document.createElement('span');
 			locSep.setAttribute('class', 'location-separator');
+			locSep.innerHTML = '<i class="icon-right-open"></i>';
 			pathContainer.appendChild(locSep);
 		}
 	});

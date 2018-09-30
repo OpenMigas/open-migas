@@ -130,27 +130,29 @@ button {
 
 .path-container {
     display: flex;
+    align-items: center;
+    padding-right: 5px;
 }
 
-.location-separator::after {
-    content: '>';
+.location-separator {
     display: block;
     height: 100%;
     display: flex;
     align-items: center;
     color: #aaa;
-    font-weight: bold; 
+    font-size: 10px;
 }
 
 .location-element {
     display: inline-block;
     padding: 5px;
-    margin-right: 5px;
     white-space: nowrap;
+    border-radius: 2px;
     cursor: pointer;
 }
 
 .location-element:hover {
+    background: rgba(255, 255, 255, 0.1);
     box-shadow: inset 0 0 0px 1px #888;
 }
 
