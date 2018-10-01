@@ -1,7 +1,8 @@
 const remote = require('electron').remote;
 const fs = require('fs');
 const path = require('path');
-const exec = require('child_process').execFile;					
+const exec = require('child_process').execFile;
+const spawn = require('child_process').spawn;
 const {Menu, MenuItem} = remote;
 
 var selected = new Selected('file-selected');
@@ -150,49 +151,101 @@ function appendFiles(explorerPath){
 
 				span.addEventListener('contextmenu', (e) => {
 					selected.clearAndAdd(span);
-					
-					const template = [
-						{
-							label: 'Open',
-							click: () => {open()}
-						},
-						{
-							type: 'separator'
-						},
-						{
-							label: 'Undo',
-							accelerator: 'Ctrl+Z',
-							click: () => {console.log('undo')}
-						},
-						{
-							label: 'Redo',
-							accelerator: 'Ctrl+Y',
-							click: () => {console.log('redo')}
-						},
-						{
-							type: 'separator'
-						},
-						{
-							label: 'Cut',
-							accelerator: 'Ctrl+X',
-							click: () => {console.log('cut')}
-						},
-						{
-							label: 'Copy',
-							accelerator: 'Ctrl+C',
-							click: () => {console.log('copy')}
-						},
-						{
-							label: 'Paste',
-							accelerator: 'Ctrl+V',
-							click: () => {console.log('paste')}
-						},
-						{
-							label: 'Delete',
-							accelerator: 'Delete',
-							click: () => {console.log('delete')}
-						}
-					];
+					let template;
+					if (stat.isDirectory()){
+						template = [
+							{
+								label: 'Open',
+								click: () => {open()}
+							},
+							{
+								label: 'Open in terminal',
+								click: () => {
+									spawn(path.resolve(__dirname, '../', 'bin', 'open-terminal.cmd'), [fileName]);
+								}
+							},
+							{
+								type: 'separator'
+							},
+							{
+								label: 'Undo',
+								accelerator: 'Ctrl+Z',
+								click: () => {console.log('undo')}
+							},
+							{
+								label: 'Redo',
+								accelerator: 'Ctrl+Y',
+								click: () => {console.log('redo')}
+							},
+							{
+								type: 'separator'
+							},
+							{
+								label: 'Cut',
+								accelerator: 'Ctrl+X',
+								click: () => {console.log('cut')}
+							},
+							{
+								label: 'Copy',
+								accelerator: 'Ctrl+C',
+								click: () => {console.log('copy')}
+							},
+							{
+								label: 'Paste',
+								accelerator: 'Ctrl+V',
+								click: () => {console.log('paste')}
+							},
+							{
+								label: 'Delete',
+								accelerator: 'Delete',
+								click: () => {console.log('delete')}
+							}
+						];
+					}
+					if (stat.isFile()){
+						template = [
+							{
+								label: 'Open',
+								click: () => {open()}
+							},
+							{
+								type: 'separator'
+							},
+							{
+								label: 'Undo',
+								accelerator: 'Ctrl+Z',
+								click: () => {console.log('undo')}
+							},
+							{
+								label: 'Redo',
+								accelerator: 'Ctrl+Y',
+								click: () => {console.log('redo')}
+							},
+							{
+								type: 'separator'
+							},
+							{
+								label: 'Cut',
+								accelerator: 'Ctrl+X',
+								click: () => {console.log('cut')}
+							},
+							{
+								label: 'Copy',
+								accelerator: 'Ctrl+C',
+								click: () => {console.log('copy')}
+							},
+							{
+								label: 'Paste',
+								accelerator: 'Ctrl+V',
+								click: () => {console.log('paste')}
+							},
+							{
+								label: 'Delete',
+								accelerator: 'Delete',
+								click: () => {console.log('delete')}
+							}
+						];
+					}
 					const menu = Menu.buildFromTemplate(template);
 					menu.popup({window: remote.getCurrentWindow()});
 				}, false);
