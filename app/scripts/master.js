@@ -171,19 +171,6 @@ function appendFiles(explorerPath){
 								type: 'separator'
 							},
 							{
-								label: 'Undo',
-								accelerator: 'Ctrl+Z',
-								click: () => {console.log('undo')}
-							},
-							{
-								label: 'Redo',
-								accelerator: 'Ctrl+Y',
-								click: () => {console.log('redo')}
-							},
-							{
-								type: 'separator'
-							},
-							{
 								label: 'Cut',
 								accelerator: 'Ctrl+X',
 								click: () => {console.log('cut')}
@@ -217,19 +204,6 @@ function appendFiles(explorerPath){
 							{
 								label: 'Open',
 								click: () => {open()}
-							},
-							{
-								type: 'separator'
-							},
-							{
-								label: 'Undo',
-								accelerator: 'Ctrl+Z',
-								click: () => {console.log('undo')}
-							},
-							{
-								label: 'Redo',
-								accelerator: 'Ctrl+Y',
-								click: () => {console.log('redo')}
 							},
 							{
 								type: 'separator'
