@@ -1,9 +1,12 @@
 const remote = require('electron').remote;
+const dialog = remote.dialog;
 const fs = require('fs');
 const path = require('path');
 const exec = require('child_process').execFile;
 const spawn = require('child_process').spawn;
 const {Menu, MenuItem} = remote;
+const trash = require('trash');
+const deleteConfirmationDialog = require('../view/delete-dialog.js');
 
 var selected = new Selected('file-selected');
 
@@ -198,7 +201,14 @@ function appendFiles(explorerPath){
 							{
 								label: 'Delete',
 								accelerator: 'Delete',
-								click: () => {console.log('delete')}
+								click: () => {
+									let dialogResponse = deleteConfirmationDialog(dialog, file);
+									console.log(dialogResponse);
+								/*	trash([fileName]).then(() => {
+										updateLocation(explorerPath);
+										console.log('done');
+									});*/
+								}
 							}
 						];
 					}
@@ -242,7 +252,14 @@ function appendFiles(explorerPath){
 							{
 								label: 'Delete',
 								accelerator: 'Delete',
-								click: () => {console.log('delete')}
+								click: () => {
+									let dialogResponse = deleteConfirmationDialog(dialog, file);
+									console.log(dialogResponse);
+								/*	trash([fileName]).then(() => {
+										updateLocation(explorerPath);
+										console.log('done');
+									});*/
+								}
 							}
 						];
 					}
