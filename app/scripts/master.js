@@ -60,213 +60,213 @@ function updateLocation(explorerPath, targetDir){
 
 	if (targetDir) {
 		locationString = path.resolve(explorerPath[explorerPath.length - 1], targetDir);
-		explorerPath.push(locationString);
 	}
 
-	appendFiles(explorerPath);
-	
-	var pathContainer = document.querySelector('.path-container');
-	var splitLocation = explorerPath[explorerPath.length - 1].split(path.sep);
-
-	//remove empty string
-	if (splitLocation[splitLocation.length - 1] === '') {
-		splitLocation.splice(-1, 1);
-	}
-	pathContainer.innerHTML = '';
-
-	splitLocation.forEach(function(item, index){
-		let locEl = document.createElement('span');
-		locEl.setAttribute('class', 'location-element');
-
-		locEl.innerHTML = item;
-
-		//get current iteration location
-		let locationSliced = splitLocation.slice(0, index + 1);
-		let currLocation = locationSliced.join(path.sep);
-
-		locEl.addEventListener('click', function(e){
-			//fix C location to be at root
-			locationSliced.length === 1 ? explorerPath.push('C:\\') : explorerPath.push(currLocation);
-			updateLocation(explorerPath);
-		});
-
-		pathContainer.appendChild(locEl);
-
-		if (index < splitLocation.length - 1){
-			let locSep = document.createElement('span');
-			locSep.setAttribute('class', 'location-separator');
-			locSep.innerHTML = '<i class="icon-right-open"></i>';
-			pathContainer.appendChild(locSep);
-		}
-	});
-}
-
-function appendFiles(explorerPath){
-	fs.readdir(explorerPath[explorerPath.length - 1], function(err, files){
+	fs.readdir(locationString, function(err, files){
 		if (err) {
 			return console.error(err);
 		}
 
-		let explorerContainer = document.querySelector('#explorer-container');
-		let navigationContainer = document.querySelector('#navigation-container');
+		appendFiles(explorerPath, files);
+		explorerPath.push(locationString);
 
-		explorerContainer.innerHTML = '';
-		navigationContainer.innerHTML = '';
+		var pathContainer = document.querySelector('.path-container');
+		var splitLocation = explorerPath[explorerPath.length - 1].split(path.sep);
 
-		setTimeout(function(){
-			files.forEach(function(file){
-				let fileName = path.resolve(explorerPath[explorerPath.length - 1], file);
-				let span = document.createElement('span');
-				let stat;
-				let open;
+		//remove empty string
+		if (splitLocation[splitLocation.length - 1] === '') {
+			splitLocation.splice(-1, 1);
+		}
+		pathContainer.innerHTML = '';
 
-				try {
-					stat = fs.statSync(fileName);
-				} catch (err) {
-					return console.error(err);
+		splitLocation.forEach(function(item, index){
+			let locEl = document.createElement('span');
+			locEl.setAttribute('class', 'location-element');
+
+			locEl.innerHTML = item;
+
+			//get current iteration location
+			let locationSliced = splitLocation.slice(0, index + 1);
+			let currLocation = locationSliced.join(path.sep);
+
+			locEl.addEventListener('click', function(e){
+				//fix C location to be at root
+				locationSliced.length === 1 ? explorerPath.push('C:\\') : explorerPath.push(currLocation);
+				updateLocation(explorerPath);
+			});
+
+			pathContainer.appendChild(locEl);
+
+			if (index < splitLocation.length - 1){
+				let locSep = document.createElement('span');
+				locSep.setAttribute('class', 'location-separator');
+				locSep.innerHTML = '<i class="icon-right-open"></i>';
+				pathContainer.appendChild(locSep);
+			}
+		});
+	});
+}
+
+function appendFiles(explorerPath, files){
+	let explorerContainer = document.querySelector('#explorer-container');
+	let navigationContainer = document.querySelector('#navigation-container');
+
+	explorerContainer.innerHTML = '';
+	navigationContainer.innerHTML = '';
+
+	setTimeout(function(){
+		files.forEach(function(file){
+			let fileName = path.resolve(explorerPath[explorerPath.length - 1], file);
+			let span = document.createElement('span');
+			let stat;
+			let open;
+
+			try {
+				stat = fs.statSync(fileName);
+			} catch (err) {
+				return console.error(err);
+			}
+
+			if (stat.isFile()){
+				open = function(){
+					let child = exec('explorer', [fileName], (err, stdout, stderr) => {
+						if (err){
+							console.error(err);
+						}
+					});
 				}
+			}
 
-				if (stat.isFile()){
-					open = function(){
-						let child = exec('explorer', [fileName], (err, stdout, stderr) => {
-							if (err){
-								console.error(err);
-							}
-						});
-					}
+			if (stat.isDirectory()){
+				open = function(){
+					updateLocation(explorerPath, file);
 				}
+			}
 
+			span.addEventListener('dblclick', function(e){
+				if (stat.isFile()) {
+					open();
+				}
+			});
+
+			span.addEventListener('click', function(e){
+				selected.clearAndAdd(span);
+			});
+
+			span.addEventListener('contextmenu', (e) => {
+				selected.clearAndAdd(span);
+				let template;
 				if (stat.isDirectory()){
-					open = function(){
-						updateLocation(explorerPath, file);
-					}
+					template = [
+						{
+							label: 'Open',
+							click: () => {open()}
+						},
+						{
+							label: 'Open in terminal',
+							click: () => {
+								spawn(path.resolve(__dirname, '../', 'bin', 'open-terminal.cmd'), [fileName]);
+							}
+						},
+						{
+							type: 'separator'
+						},
+						{
+							label: 'Cut',
+							accelerator: 'Ctrl+X',
+							click: () => {console.log('cut')}
+						},
+						{
+							label: 'Copy',
+							accelerator: 'Ctrl+C',
+							click: () => {console.log('copy')}
+						},
+						{
+							label: 'Paste',
+							accelerator: 'Ctrl+V',
+							click: () => {console.log('paste')}
+						},
+						{
+							label: 'Delete',
+							accelerator: 'Delete',
+							click: () => {
+								deleteConfirmationDialog(dialog, file, stat, (res) => {
+									console.log(res);
+								/*	trash([fileName]).then(() => {
+										updateLocation(explorerPath);
+										console.log('done');
+									});*/
+								});
+							}
+						}
+					];
 				}
-
-				span.addEventListener('dblclick', function(e){
-					if (stat.isFile()) {
-						open();
-					}
-				});
-
-				span.addEventListener('click', function(e){
-					selected.clearAndAdd(span);
-				});
-
-				span.addEventListener('contextmenu', (e) => {
-					selected.clearAndAdd(span);
-					let template;
-					if (stat.isDirectory()){
-						template = [
-							{
-								label: 'Open',
-								click: () => {open()}
-							},
-							{
-								label: 'Open in terminal',
-								click: () => {
-									spawn(path.resolve(__dirname, '../', 'bin', 'open-terminal.cmd'), [fileName]);
-								}
-							},
-							{
-								type: 'separator'
-							},
-							{
-								label: 'Cut',
-								accelerator: 'Ctrl+X',
-								click: () => {console.log('cut')}
-							},
-							{
-								label: 'Copy',
-								accelerator: 'Ctrl+C',
-								click: () => {console.log('copy')}
-							},
-							{
-								label: 'Paste',
-								accelerator: 'Ctrl+V',
-								click: () => {console.log('paste')}
-							},
-							{
-								label: 'Delete',
-								accelerator: 'Delete',
-								click: () => {
-									deleteConfirmationDialog(dialog, file, stat, (res) => {
-										console.log(res);
+				if (stat.isFile()){
+					template = [
+						{
+							label: 'Open',
+							click: () => {open()}
+						},
+						{
+							type: 'separator'
+						},
+						{
+							label: 'Cut',
+							accelerator: 'Ctrl+X',
+							click: () => {console.log('cut')}
+						},
+						{
+							label: 'Copy',
+							accelerator: 'Ctrl+C',
+							click: () => {console.log('copy')}
+						},
+						{
+							label: 'Paste',
+							accelerator: 'Ctrl+V',
+							click: () => {console.log('paste')}
+						},
+						{
+							label: 'Delete',
+							accelerator: 'Delete',
+							click: () => {
+								deleteConfirmationDialog(dialog, file, stat, (res) => {
+									console.log(res);
 									/*	trash([fileName]).then(() => {
 											updateLocation(explorerPath);
 											console.log('done');
 										});*/
-									});
-								}
+								});
 							}
-						];
-					}
-					if (stat.isFile()){
-						template = [
-							{
-								label: 'Open',
-								click: () => {open()}
-							},
-							{
-								type: 'separator'
-							},
-							{
-								label: 'Cut',
-								accelerator: 'Ctrl+X',
-								click: () => {console.log('cut')}
-							},
-							{
-								label: 'Copy',
-								accelerator: 'Ctrl+C',
-								click: () => {console.log('copy')}
-							},
-							{
-								label: 'Paste',
-								accelerator: 'Ctrl+V',
-								click: () => {console.log('paste')}
-							},
-							{
-								label: 'Delete',
-								accelerator: 'Delete',
-								click: () => {
-									deleteConfirmationDialog(dialog, file, stat, (res) => {
-										console.log(res);
-										/*	trash([fileName]).then(() => {
-												updateLocation(explorerPath);
-												console.log('done');
-											});*/
-									});
-								}
-							}
-						];
-					}
-					const menu = Menu.buildFromTemplate(template);
-					menu.popup({window: remote.getCurrentWindow()});
-				}, false);
-
-				if (stat.isDirectory()){
-					//side nav folder structure
-					let sideNavFolder = document.createElement('span');
-					sideNavFolder.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
-					sideNavFolder.addEventListener('dblclick', function(e){
-						updateLocation(explorerPath, file);
-					});
-					navigationContainer.appendChild(sideNavFolder);
-
-					//explorer folders
-					span.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
-					navigationContainer.appendChild(span);
-					//add event listener
-					span.addEventListener('dblclick', function(e){
-						open();
-					});
-				} else {
-					span.innerHTML = '<img src="img/file-icon.png" class="icon">' + file;
+						}
+					];
 				}
+				const menu = Menu.buildFromTemplate(template);
+				menu.popup({window: remote.getCurrentWindow()});
+			}, false);
 
-				explorerContainer.appendChild(span);
-			});
-		}, 0);
-	});
+			if (stat.isDirectory()){
+				//side nav folder structure
+				let sideNavFolder = document.createElement('span');
+				sideNavFolder.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
+				sideNavFolder.addEventListener('dblclick', function(e){
+					updateLocation(explorerPath, file);
+				});
+				navigationContainer.appendChild(sideNavFolder);
+
+				//explorer folders
+				span.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
+				navigationContainer.appendChild(span);
+				//add event listener
+				span.addEventListener('dblclick', function(e){
+					open();
+				});
+			} else {
+				span.innerHTML = '<img src="img/file-icon.png" class="icon">' + file;
+			}
+
+			explorerContainer.appendChild(span);
+		});
+	}, 0);
 }
 
 function Selected(className){
