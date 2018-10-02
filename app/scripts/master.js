@@ -189,12 +189,13 @@ function appendFiles(explorerPath){
 								label: 'Delete',
 								accelerator: 'Delete',
 								click: () => {
-									let dialogResponse = deleteConfirmationDialog(dialog, file);
-									console.log(dialogResponse);
-								/*	trash([fileName]).then(() => {
-										updateLocation(explorerPath);
-										console.log('done');
-									});*/
+									deleteConfirmationDialog(dialog, file, stat, (res) => {
+										console.log(res);
+									/*	trash([fileName]).then(() => {
+											updateLocation(explorerPath);
+											console.log('done');
+										});*/
+									});
 								}
 							}
 						];
@@ -227,12 +228,13 @@ function appendFiles(explorerPath){
 								label: 'Delete',
 								accelerator: 'Delete',
 								click: () => {
-									let dialogResponse = deleteConfirmationDialog(dialog, file);
-									console.log(dialogResponse);
-								/*	trash([fileName]).then(() => {
-										updateLocation(explorerPath);
-										console.log('done');
-									});*/
+									deleteConfirmationDialog(dialog, file, stat, (res) => {
+										console.log(res);
+										/*	trash([fileName]).then(() => {
+												updateLocation(explorerPath);
+												console.log('done');
+											});*/
+									});
 								}
 							}
 						];
