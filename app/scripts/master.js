@@ -34,7 +34,7 @@ function init(){
 		win.minimize();
 	});
 
-	updateLocation(explorerPath);
+	updateLocation(explorerPath, null, document.querySelector('#system-drive'));
 
 	document.querySelector('#up').addEventListener('click', function(){
 		updateLocation(explorerPath, '../');
@@ -55,7 +55,7 @@ function init(){
 	});
 }
 
-function updateLocation(explorerPath, targetDir){
+function updateLocation(explorerPath, targetDir, parentFolder){
 	var locationString = explorerPath[explorerPath.length - 1];
 
 	if (targetDir) {
@@ -67,7 +67,7 @@ function updateLocation(explorerPath, targetDir){
 			return console.error(err);
 		}
 
-		appendFiles(explorerPath, files);
+		appendFiles(explorerPath, files, parentFolder);
 		explorerPath.push(locationString);
 
 		var pathContainer = document.querySelector('.path-container');
@@ -107,12 +107,13 @@ function updateLocation(explorerPath, targetDir){
 	});
 }
 
-function appendFiles(explorerPath, files){
+function appendFiles(explorerPath, files, parentFolder){
 	let explorerContainer = document.querySelector('#explorer-container');
 	let navigationContainer = document.querySelector('#navigation-container');
+	let subfolderContainer = document.createElement('ul');
 
+	subfolderContainer.classList.add('subfolder');
 	explorerContainer.innerHTML = '';
-	navigationContainer.innerHTML = '';
 
 	setTimeout(function(){
 		files.forEach(function(file){
@@ -144,17 +145,23 @@ function appendFiles(explorerPath, files){
 			}
 
 			if (stat.isDirectory()){
+				let listElement = document.createElement('li');
+
 				open = function(){
-					updateLocation(explorerPath, file);
+					updateLocation(explorerPath, file, listElement);
 				}
 
 				//side nav folder structure
-				let sideNavFolder = document.createElement('span');
-				sideNavFolder.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
-				sideNavFolder.addEventListener('dblclick', function(e){
-					updateLocation(explorerPath, file);
+				let folderName = document.createElement('span');
+				folderName.innerHTML = file;
+				listElement.addEventListener('dblclick', function(e){
+					updateLocation(explorerPath, file, listElement);
 				});
-				navigationContainer.appendChild(sideNavFolder);
+
+				listElement.appendChild(folderName);
+				subfolderContainer.appendChild(listElement);
+				parentFolder.appendChild(subfolderContainer);
+			//	navigationContainer.appendChild(sideNavFolder);
 
 				//explorer folders
 				span.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
@@ -162,7 +169,7 @@ function appendFiles(explorerPath, files){
 				span.addEventListener('dblclick', function(e){
 					open();
 				});
-			}			
+			}
 
 			span.addEventListener('click', function(e){
 				selected.clearAndAdd(span);

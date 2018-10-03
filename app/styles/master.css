@@ -174,8 +174,18 @@ main {
     overflow-y: auto;
 }
 
+.navigation-pane ul {
+    list-style: none;
+}
+
 .navigation-container {
     width: 100%;
+    padding-left: 5px;
+}
+
+.subfolder {
+    padding-left: 10px;
+    border-left: dotted 1px #fff;
 }
 
 .navigation-container span {
