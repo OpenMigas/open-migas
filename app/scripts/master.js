@@ -135,19 +135,35 @@ function appendFiles(explorerPath, files){
 						}
 					});
 				}
+
+				span.addEventListener('dblclick', function(e){
+					open();
+				});
+				
+				span.innerHTML = '<img src="img/file-icon.png" class="icon">' + file;
 			}
 
 			if (stat.isDirectory()){
 				open = function(){
 					updateLocation(explorerPath, file);
 				}
-			}
 
-			span.addEventListener('dblclick', function(e){
-				if (stat.isFile()) {
+				//side nav folder structure
+				let sideNavFolder = document.createElement('span');
+				sideNavFolder.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
+				sideNavFolder.addEventListener('dblclick', function(e){
+					updateLocation(explorerPath, file);
+				});
+				navigationContainer.appendChild(sideNavFolder);
+
+				//explorer folders
+				span.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
+				navigationContainer.appendChild(span);
+				//add event listener
+				span.addEventListener('dblclick', function(e){
 					open();
-				}
-			});
+				});
+			}			
 
 			span.addEventListener('click', function(e){
 				selected.clearAndAdd(span);
@@ -243,26 +259,6 @@ function appendFiles(explorerPath, files){
 				const menu = Menu.buildFromTemplate(template);
 				menu.popup({window: remote.getCurrentWindow()});
 			}, false);
-
-			if (stat.isDirectory()){
-				//side nav folder structure
-				let sideNavFolder = document.createElement('span');
-				sideNavFolder.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
-				sideNavFolder.addEventListener('dblclick', function(e){
-					updateLocation(explorerPath, file);
-				});
-				navigationContainer.appendChild(sideNavFolder);
-
-				//explorer folders
-				span.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
-				navigationContainer.appendChild(span);
-				//add event listener
-				span.addEventListener('dblclick', function(e){
-					open();
-				});
-			} else {
-				span.innerHTML = '<img src="img/file-icon.png" class="icon">' + file;
-			}
 
 			explorerContainer.appendChild(span);
 		});
