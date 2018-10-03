@@ -158,7 +158,6 @@ function appendFiles(explorerPath, files){
 
 				//explorer folders
 				span.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
-				navigationContainer.appendChild(span);
 				//add event listener
 				span.addEventListener('dblclick', function(e){
 					open();
