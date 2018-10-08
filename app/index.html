@@ -22,19 +22,15 @@
             <button id="forward" class="navigation-button"><i class="icon-right-big"></i></button>
             <button id="up" class="navigation-button"><i class="icon-up-big"></i></button>
             <button id="reload" class="navigation-button"><i class="icon-cw"></i></button>
-            <div class="directory-path" id="directory-path-bar">
-                <div class="path-container"></div>
+            <div class="directory-path">
+                <div id="breadcrumb-bar" class="path-container"></div>
                 <div class="grad-shadow"></div>
             </div>
             <input type="text" placeholder="Search" class="search-bar">
         </div>
         <main>
             <div class="navigation-pane">
-                <ul class="navigation-container" id="navigation-container">
-                    <li id="system-drive">
-                        <span class="folder-name">C:</span>
-                    </li>
-                </ul>
+                <div class="navigation-container" id="folder-tree"></div>
             </div>
             <div class="explorer">
                 <div class="explorer-container" id="explorer-container"></div>
