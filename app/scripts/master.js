@@ -85,7 +85,7 @@ function init(){
 	});
 
 	tree.on('selected', function(ele){
-		loadView(ele.fullname, (childElements) => {
+		loadView(ele.fullname, history, (childElements) => {
 			ele.children = childElements;
 			history.add(ele.fullname);
 			console.log(history.getHistoryPath());
@@ -98,7 +98,7 @@ function init(){
 	});
 
 	document.querySelector('#reload').addEventListener('click', function(){
-		loadView(history.getCurrentLocation(), function(childElements){
+		loadView(history.getCurrentLocation(), history, function(childElements){
 			tree.loop.update({root});
 		});
 	});
@@ -114,7 +114,7 @@ function init(){
 	});
 }
 
-function loadView(fullname, loaded){
+function loadView(fullname, history, loaded){
 	readFolder(fullname, (childFiles) => {
 		let childElements = [];
 		childFiles.forEach((item, index) => {
@@ -126,8 +126,12 @@ function loadView(fullname, loaded){
 				};
 			}
 		});
-		updateLocation(fullname, childFiles, () => {
+		updateLocation(fullname, childFiles, (gotoLocation) => {
 			//go to another location
+			loadView(gotoLocation, history, function(){
+				history.add(gotoLocation);
+				console.log(history.getHistoryPath());
+			});
 		});
 		loaded(childElements);
 	});
@@ -183,6 +187,7 @@ function updateBreadcrumbLocation(location, callback){
 		//get current iteration location
 		let locationSliced = splitLocation.slice(0, index + 1);
 		let itemLocation = locationSliced.join(path.sep);
+		if (itemLocation[itemLocation.length - 1] === ':') itemLocation += path.sep;
 
 		locationSubfolder.addEventListener('click', function(e){
 			callback(itemLocation);
@@ -201,7 +206,7 @@ function updateBreadcrumbLocation(location, callback){
 }
 
 //main explorer view items
-function createExplorerItem(location, name, stat, goto){
+function createExplorerItem(location, name, stat, gotoLocation){
 	var ele = document.createElement('span');
 	let fullname = path.resolve(location, name);
 	ele.innerHTML = name;
@@ -220,37 +225,28 @@ function createExplorerItem(location, name, stat, goto){
 		});
 
 		ele.addEventListener('contextmenu', function(e){
-			let template = createFileContextMenu(fullname, open);
+			let template = createFileContextMenu(fullname, stat, open);
 			const menu = Menu.buildFromTemplate(template);
 			menu.popup({window: remote.getCurrentWindow()});
 		});
 		ele.innerHTML = '<i class="icon-doc element-item-icon file-icon"></i>' + name;
 	} else if (stat.isDirectory()){
+		ele.addEventListener('dblclick', function(){
+			gotoLocation(fullname);
+		});
+
 		ele.addEventListener('contextmenu', function(e){
-			let template = createFolderContextMenu(fullname, function(){console.log('open folder')});
+			let template = createFolderContextMenu(fullname, stat, function(){console.log('open folder')});
 			const menu = Menu.buildFromTemplate(template);
 			menu.popup({window: remote.getCurrentWindow()});
 		});
 		ele.innerHTML = '<i class="icon-folder-open element-item-icon folder-icon"></i>' + name;
 	}
 
-	ele.addEventListener('dblclick', function(e){
-		if (stat.isFile()){
-			//open with default program
-		} else if (stat.isDirectory()){
-			//open this folder
-			//goto location
-		}
-	});
-
-	function openFile(){
-
-	}
-
 	return ele;
 }
 
-function createFolderContextMenu(folderFullname, open, del){
+function createFolderContextMenu(folderFullname, stat, open, del){
 	return [
 		{
 			label: 'Open',
@@ -284,7 +280,7 @@ function createFolderContextMenu(folderFullname, open, del){
 			label: 'Delete',
 			accelerator: 'Delete',
 			click: () => {
-				deleteConfirmationDialog(dialog, file, stat, (res) => {
+				deleteConfirmationDialog(dialog, folderFullname, stat, (res) => {
 					console.log(res);
 				/*	trash([fileName]).then(() => {
 						updateLocation(explorerPath);
@@ -296,7 +292,7 @@ function createFolderContextMenu(folderFullname, open, del){
 	];
 }
 
-function createFileContextMenu(fileFullname, open, del){
+function createFileContextMenu(fileFullname, stat, open, del){
 	return [
 		{
 			label: 'Open',
@@ -324,7 +320,7 @@ function createFileContextMenu(fileFullname, open, del){
 			label: 'Delete',
 			accelerator: 'Delete',
 			click: () => {
-				deleteConfirmationDialog(dialog, file, stat, (res) => {
+				deleteConfirmationDialog(dialog, fileFullname, stat, (res) => {
 					console.log(res);
 					/*	trash([fileName]).then(() => {
 							updateLocation(explorerPath);
