@@ -9,7 +9,7 @@
     <body>
         <div class="title-bar">
             <div class="title">
-                Electron app
+                OpenMigas
             </div>
             <div class="window-buttons">
                 <button id="minimize-button" class="minimize-button"><i class="icon-window-minimize"></i></button>
@@ -22,15 +22,15 @@
             <button id="forward" class="navigation-button"><i class="icon-right-big"></i></button>
             <button id="up" class="navigation-button"><i class="icon-up-big"></i></button>
             <button id="reload" class="navigation-button"><i class="icon-cw"></i></button>
-            <div class="directory-path" id="directory-path-bar">
-                <div class="path-container"></div>
+            <div class="directory-path">
+                <div id="breadcrumb-bar" class="path-container"></div>
                 <div class="grad-shadow"></div>
             </div>
             <input type="text" placeholder="Search" class="search-bar">
         </div>
         <main>
             <div class="navigation-pane">
-                <div class="navigation-container" id="navigation-container"></div>
+                <div class="navigation-container" id="folder-tree"></div>
             </div>
             <div class="explorer">
                 <div class="explorer-container" id="explorer-container"></div>

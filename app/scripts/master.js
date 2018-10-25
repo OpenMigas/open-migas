@@ -1,22 +1,33 @@
 const remote = require('electron').remote;
-const dialog = remote.dialog;
 const fs = require('fs');
 const path = require('path');
 const exec = require('child_process').execFile;
 const spawn = require('child_process').spawn;
-const {Menu, MenuItem} = remote;
+const {Menu, MenuItem, dialog} = remote;
 const trash = require('trash');
 const deleteConfirmationDialog = require('../view/delete-dialog.js');
+const vdom = require('virtual-dom');
+const hyperx = require('hyperx');
+const hx = hyperx(vdom.h);
+
+const History = require('../lib/history.js');
+const createFileContextMenu = require('../lib/file-ctx-menu.js');
+const createFolderContextMenu = require('../lib/folder-ctx-menu.js');
+const createExplorerItem = require('../lib/explorer-item.js');
+
+const loadView = require('../lib/load-view.js');
 
 var selected = new Selected('file-selected');
 
 function init(){
 	var win = remote.getCurrentWindow();
-	let explorerPath = ['C:\\'];
+	let history = new History();
+	let explorerDOMElement = document.querySelector('#explorer-container');
+	let breadcrumbBar = document.querySelector('#breadcrumb-bar');
 
 	window.addEventListener('contextmenu', (e) => {
 		e.preventDefault();
-	})
+	});
 
 	document.querySelector('#close-button').addEventListener('click', function(e){
 		win.close();
@@ -34,14 +45,59 @@ function init(){
 		win.minimize();
 	});
 
-	updateLocation(explorerPath);
+	const root = {
+		name: 'C:',
+		fullname: 'C:\\',
+		children: []
+	};
+
+	const tree = require('electron-tree-view')({
+		root,
+		container: document.querySelector('#folder-tree'),
+		children: c => c.children,
+		label: c => c.name,
+		renderItem: (hx, data, children, loadHook, clickElem, createChild) => {
+			return hx`<div class="" loaded=${loadHook}>
+				<a href="#" class="clickable-elem" onclick=${clickElem}>
+				<div>
+					<span>${hx`<i class="icon-right-open chevron" />`} ${data.name}</span>
+				</div>
+				</a>
+				<ul>
+					${children.map(createChild)}
+				</ul>
+			</div>`
+		}
+	});
+
+	tree.on('selected', function(ele){
+		loadView(ele.fullname, history, explorerDOMElement, breadcrumbBar, (childElements) => {
+			ele.children = childElements;
+			history.add(ele.fullname);
+			console.log(history.getHistoryPath());
+			tree.loop.update({root});
+		});
+	});
+
+	document.querySelector('#back').addEventListener('click', function(){
+		history.goBack();
+		loadView(history.getCurrentLocation(), history, explorerDOMElement, breadcrumbBar, function(){});
+	});
+
+	document.querySelector('#forward').addEventListener('click', function(){
+		history.goForward();
+		loadView(history.getCurrentLocation(), history, explorerDOMElement, breadcrumbBar, function(){});
+	});
 
 	document.querySelector('#up').addEventListener('click', function(){
-		updateLocation(explorerPath, '../');
+		history.goUp();
+		loadView(history.getCurrentLocation(), history, explorerDOMElement, breadcrumbBar, function(){});
 	});
 
 	document.querySelector('#reload').addEventListener('click', function(){
-		updateLocation(explorerPath);
+		loadView(history.getCurrentLocation(), history, explorerDOMElement, breadcrumbBar, function(childElements){
+			tree.loop.update({root});
+		});
 	});
 
 	win.on('resize', function(){
@@ -53,215 +109,6 @@ function init(){
 			document.querySelector('body').style.border = 'solid 5px #000';
 		}
 	});
-}
-
-function updateLocation(explorerPath, targetDir){
-	var locationString = explorerPath[explorerPath.length - 1];
-
-	if (targetDir) {
-		locationString = path.resolve(explorerPath[explorerPath.length - 1], targetDir);
-	}
-
-	fs.readdir(locationString, function(err, files){
-		if (err) {
-			return console.error(err);
-		}
-
-		appendFiles(explorerPath, files);
-		explorerPath.push(locationString);
-
-		var pathContainer = document.querySelector('.path-container');
-		var splitLocation = explorerPath[explorerPath.length - 1].split(path.sep);
-
-		//remove empty string
-		if (splitLocation[splitLocation.length - 1] === '') {
-			splitLocation.splice(-1, 1);
-		}
-		pathContainer.innerHTML = '';
-
-		splitLocation.forEach(function(item, index){
-			let locEl = document.createElement('span');
-			locEl.setAttribute('class', 'location-element');
-
-			locEl.innerHTML = item;
-
-			//get current iteration location
-			let locationSliced = splitLocation.slice(0, index + 1);
-			let currLocation = locationSliced.join(path.sep);
-
-			locEl.addEventListener('click', function(e){
-				//fix C location to be at root
-				locationSliced.length === 1 ? explorerPath.push('C:\\') : explorerPath.push(currLocation);
-				updateLocation(explorerPath);
-			});
-
-			pathContainer.appendChild(locEl);
-
-			if (index < splitLocation.length - 1){
-				let locSep = document.createElement('span');
-				locSep.setAttribute('class', 'location-separator');
-				locSep.innerHTML = '<i class="icon-right-open"></i>';
-				pathContainer.appendChild(locSep);
-			}
-		});
-	});
-}
-
-function appendFiles(explorerPath, files){
-	let explorerContainer = document.querySelector('#explorer-container');
-	let navigationContainer = document.querySelector('#navigation-container');
-
-	explorerContainer.innerHTML = '';
-	navigationContainer.innerHTML = '';
-
-	setTimeout(function(){
-		files.forEach(function(file){
-			let fileName = path.resolve(explorerPath[explorerPath.length - 1], file);
-			let span = document.createElement('span');
-			let stat;
-			let open;
-
-			try {
-				stat = fs.statSync(fileName);
-			} catch (err) {
-				return console.error(err);
-			}
-
-			if (stat.isFile()){
-				open = function(){
-					let child = exec('explorer', [fileName], (err, stdout, stderr) => {
-						if (err){
-							console.error(err);
-						}
-					});
-				}
-
-				span.addEventListener('dblclick', function(e){
-					open();
-				});
-				
-				span.innerHTML = '<img src="img/file-icon.png" class="icon">' + file;
-			}
-
-			if (stat.isDirectory()){
-				open = function(){
-					updateLocation(explorerPath, file);
-				}
-
-				//side nav folder structure
-				let sideNavFolder = document.createElement('span');
-				sideNavFolder.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
-				sideNavFolder.addEventListener('dblclick', function(e){
-					updateLocation(explorerPath, file);
-				});
-				navigationContainer.appendChild(sideNavFolder);
-
-				//explorer folders
-				span.innerHTML = '<img src="img/folder-icon.png" class="icon">' + file;
-				//add event listener
-				span.addEventListener('dblclick', function(e){
-					open();
-				});
-			}			
-
-			span.addEventListener('click', function(e){
-				selected.clearAndAdd(span);
-			});
-
-			span.addEventListener('contextmenu', (e) => {
-				selected.clearAndAdd(span);
-				let template;
-				if (stat.isDirectory()){
-					template = [
-						{
-							label: 'Open',
-							click: () => {open()}
-						},
-						{
-							label: 'Open in terminal',
-							click: () => {
-								spawn(path.resolve(__dirname, '../', 'bin', 'open-terminal.cmd'), [fileName]);
-							}
-						},
-						{
-							type: 'separator'
-						},
-						{
-							label: 'Cut',
-							accelerator: 'Ctrl+X',
-							click: () => {console.log('cut')}
-						},
-						{
-							label: 'Copy',
-							accelerator: 'Ctrl+C',
-							click: () => {console.log('copy')}
-						},
-						{
-							label: 'Paste',
-							accelerator: 'Ctrl+V',
-							click: () => {console.log('paste')}
-						},
-						{
-							label: 'Delete',
-							accelerator: 'Delete',
-							click: () => {
-								deleteConfirmationDialog(dialog, file, stat, (res) => {
-									console.log(res);
-								/*	trash([fileName]).then(() => {
-										updateLocation(explorerPath);
-										console.log('done');
-									});*/
-								});
-							}
-						}
-					];
-				}
-				if (stat.isFile()){
-					template = [
-						{
-							label: 'Open',
-							click: () => {open()}
-						},
-						{
-							type: 'separator'
-						},
-						{
-							label: 'Cut',
-							accelerator: 'Ctrl+X',
-							click: () => {console.log('cut')}
-						},
-						{
-							label: 'Copy',
-							accelerator: 'Ctrl+C',
-							click: () => {console.log('copy')}
-						},
-						{
-							label: 'Paste',
-							accelerator: 'Ctrl+V',
-							click: () => {console.log('paste')}
-						},
-						{
-							label: 'Delete',
-							accelerator: 'Delete',
-							click: () => {
-								deleteConfirmationDialog(dialog, file, stat, (res) => {
-									console.log(res);
-									/*	trash([fileName]).then(() => {
-											updateLocation(explorerPath);
-											console.log('done');
-										});*/
-								});
-							}
-						}
-					];
-				}
-				const menu = Menu.buildFromTemplate(template);
-				menu.popup({window: remote.getCurrentWindow()});
-			}, false);
-
-			explorerContainer.appendChild(span);
-		});
-	}, 0);
 }
 
 function Selected(className){
