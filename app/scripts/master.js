@@ -46,8 +46,8 @@ function init(){
 	});
 
 	const root = {
-		name: 'C:',
-		fullname: 'C:\\',
+		name: 'My Computer',
+		fullname: null,
 		children: []
 	};
 
