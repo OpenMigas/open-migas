@@ -74,7 +74,6 @@ function init(){
 		loadView(ele.fullname, history, explorerDOMElement, breadcrumbBar, (childElements) => {
 			ele.children = childElements;
 			history.add(ele.fullname);
-			console.log(history.getHistoryPath());
 			tree.loop.update({root});
 		});
 	});
