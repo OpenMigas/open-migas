@@ -120,6 +120,17 @@ button {
     background: #484848;
 }
 
+.directory-path input {
+    position: relative;
+    width: 100%;
+    padding: 5px;
+    font-size: 1em;
+    font-family: sans-serif;
+    background: none;
+    color: #fff;
+    z-index: 1000;
+}
+
 .grad-shadow {
     position: absolute;
     left: 0;

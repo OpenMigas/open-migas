@@ -99,6 +99,28 @@ function init(){
 		});
 	});
 
+	let activeInput = false;
+	document.querySelector('.directory-path').addEventListener('click', function(e){
+		let dirPath = this;
+		if (!activeInput){
+			activeInput = true;
+			let input = document.createElement('input');
+			input.value = history.getCurrentLocation();
+			dirPath.appendChild(input);
+			input.focus();
+			input.select();
+
+			let prevDisplay = breadcrumbBar.style.display;
+			breadcrumbBar.style.display = 'none';
+
+			input.addEventListener('blur', function(){
+				breadcrumbBar.style.display = prevDisplay;
+				dirPath.removeChild(input);
+				activeInput = false;
+			});
+		}
+	});
+
 	win.on('resize', function(){
 		if (win.isMaximized()){
 			document.querySelector('#maximize-button').innerHTML = '<i class="icon-window-restore"></i>';
