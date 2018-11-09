@@ -102,6 +102,7 @@ function init(){
 	let activeInput = false;
 	document.querySelector('.directory-path').addEventListener('click', function(e){
 		let dirPath = this;
+
 		if (!activeInput){
 			activeInput = true;
 			let input = document.createElement('input');
@@ -114,9 +115,22 @@ function init(){
 			breadcrumbBar.style.display = 'none';
 
 			input.addEventListener('blur', function(){
+				let inputValue = input.value;
+
 				breadcrumbBar.style.display = prevDisplay;
 				dirPath.removeChild(input);
 				activeInput = false;
+				input = null;
+
+				loadView(inputValue, history, explorerDOMElement, breadcrumbBar, (childElements) => {
+					history.add(inputValue);
+				});
+			});
+
+			input.addEventListener('keyup', function(e){
+				if (e.keyCode === 13){
+					input.blur();
+				}
 			});
 		}
 	});
