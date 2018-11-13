@@ -1,6 +1,11 @@
 # open-migas
 File manager for Windows OS
 
+## How to install (only for Windows)
+- Clone the repository
+- Run `npm install` in the command line
+- Execute the application in a development environment running `npm start` or pack in a distributable format with `npm dist`
+
 ## Contributions
 This project is open for contributions (If you are a begineer in Pull Requests, better!)
 
